@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pleiades - Menstrual Cycle Tracker</title>
+  <meta name="description"
+    content="Pleiades is a beautiful, secure, and user-friendly menstrual period tracker. Log dates, symptoms, flow, and get predictions.">
+  <link rel="stylesheet" href="style.css?v=2">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <i class="fa-solid fa-moon"></i> Pleiades
+    </div>
+    <nav>
+      <button id="nav-dashboard" class="nav-btn active" data-label="Dashboard"><i class="fa-solid fa-home"></i>
+        <span>Dashboard</span></button>
+      <button id="nav-calendar" class="nav-btn" data-label="Calendar"><i class="fa-solid fa-calendar-days"></i>
+        <span>Calendar</span></button>
+      <button id="nav-game" class="nav-btn" data-label="Relax"><i class="fa-solid fa-gamepad"></i>
+        <span>Relax</span></button>
+      <button id="nav-profile" class="nav-btn" data-label="Profile"><i class="fa-solid fa-user"></i>
+        <span>Profile</span></button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Onboarding / Profile View -->
+    <section id="view-profile" class="view hidden">
+      <div class="card fade-in">
+        <h2><i class="fa-solid fa-leaf"></i> Welcome to Pleiades</h2>
+        <p>Let's personalize your experience. Your data is stored securely on your device.</p>
+        <br>
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="user-name">Name</label>
+            <input type="text" id="user-name" placeholder="Enter your name" required>
+          </div>
+          <div class="form-group">
+            <label for="user-age">Age</label>
+            <input type="number" id="user-age" placeholder="Enter your age">
+          </div>
+          <div class="form-group">
+            <label for="user-cycle-length">Average Cycle Length (Days)</label>
+            <input type="number" id="user-cycle-length" value="28" required>
+          </div>
+          <div class="form-group">
+            <label for="user-period-length">Average Period Length (Days)</label>
+            <input type="number" id="user-period-length" value="5" required>
+          </div>
+          <button type="submit" class="btn primary">Save Profile</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Dashboard View -->
+    <section id="view-dashboard" class="view">
+      <header class="dashboard-header fade-in">
+        <h1 id="greeting-title">Hello!</h1>
+        <p>Your period is expected in <strong id="countdown-days">--</strong> days.</p>
+      </header>
+
+      <div class="dashboard-grid fade-in">
+        <!-- Next Period Widget -->
+        <div class="card prediction-card">
+          <div class="prediction-circle">
+            <span id="circle-days">--</span>
+            <small>Days</small>
+          </div>
+          <p id="prediction-date">Next period predicted for: <strong>--</strong></p>
+          <button id="btn-log-today" class="btn secondary"><i class="fa-solid fa-droplet"></i> Log Period Today</button>
+        </div>
+
+        <!-- Today's Log Widget -->
+        <div class="card log-card">
+          <h3>Log Symptoms for <span id="log-date-display" style="color:var(--accent-color);">Today</span></h3>
+          <form id="log-form" style="margin-top: 1rem;">
+            <input type="hidden" id="log-date-input">
+
+            <div class="form-group">
+              <label>Pain / Cramp Level</label>
+              <div class="slider-container">
+                <input type="range" id="log-pain" min="0" max="10" value="0">
+                <div class="slider-labels">
+                  <span>None</span>
+                  <span>Severe</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Blood Flow</label>
+              <select id="log-flow">
+                <option value="none">None</option>
+                <option value="light">Light</option>
+                <option value="medium">Medium</option>
+                <option value="heavy">Heavy</option>
+                <option value="overflow">Overflow</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Mood</label>
+              <select id="log-mood">
+                <option value="none">Normal</option>
+                <option value="happy">Happy</option>
+                <option value="sensitive">Sensitive</option>
+                <option value="sad">Sad / Tearful</option>
+                <option value="irritable">Irritable / Angry</option>
+                <option value="anxious">Anxious</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Nutrient Loss & Health Observations</label>
+              <textarea id="log-notes" rows="3"
+                placeholder="E.g., Took iron supplements, feeling sleepy, headache..."></textarea>
+            </div>
+
+            <button type="submit" class="btn primary">Save Log</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Calendar View -->
+    <section id="view-calendar" class="view hidden">
+      <div class="card fade-in">
+        <div class="calendar-header">
+          <button id="prev-month" class="icon-btn"><i class="fa-solid fa-chevron-left"></i></button>
+          <h2 id="calendar-month-year">Month Year</h2>
+          <button id="next-month" class="icon-btn"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <div class="calendar-grid">
+          <div class="day-name">Sun</div>
+          <div class="day-name">Mon</div>
+          <div class="day-name">Tue</div>
+          <div class="day-name">Wed</div>
+          <div class="day-name">Thu</div>
+          <div class="day-name">Fri</div>
+          <div class="day-name">Sat</div>
+          <!-- Days injected here -->
+        </div>
+
+        <div class="calendar-legend">
+          <div class="legend-item"><span class="dot period-dot"></span> Logged Period</div>
+          <div class="legend-item"><span class="dot predicted-dot"></span> Predicted</div>
+          <div class="legend-item"><span class="dot symptom-dot"></span> Symptoms Logged</div>
+        </div>
+
+        <div id="calendar-preview" class="card hidden"
+          style="margin-top: 2rem; border: 2px dashed var(--accent-color); padding: 1.5rem;">
+          <h3 id="preview-date" style="color:var(--accent-color); margin-bottom: 1rem;">Select a date...</h3>
+          <div id="preview-content" class="hidden">
+            <p style="margin-bottom: 0.5rem;"><strong>Flow:</strong> <span id="preview-flow"></span></p>
+            <p style="margin-bottom: 0.5rem;"><strong>Pain:</strong> <span id="preview-pain"></span>/10</p>
+            <p style="margin-bottom: 0.5rem;"><strong>Mood:</strong> <span id="preview-mood"></span></p>
+            <p style="margin-bottom: 1rem;"><strong>Notes:</strong> <span id="preview-notes"></span></p>
+            <button id="btn-edit-log-preview" class="btn primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Edit
+              Log for this Date</button>
+          </div>
+          <p id="preview-empty" class="hidden text-muted">No symptoms logged for this date.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game View -->
+    <section id="view-game" class="view hidden">
+      <div class="card fade-in text-center" style="text-align: center;">
+        <h2 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fa-solid fa-face-smile-beam"></i> Mood
+          Booster</h2>
+        <p>Smash the bad vibes to feel better!</p>
+        <div id="game-container" style="margin: 2rem auto;">
+          <div id="game-face" style="font-size: 8rem; cursor: pointer; user-select: none; display: inline-block;">😡
+          </div>
+          <div
+            style="width: 100%; max-width: 300px; height: 20px; background: #eee; border-radius: 10px; margin: 2rem auto; overflow: hidden; border: 2px solid var(--border-color);">
+            <div id="game-bar"
+              style="width: 100%; height: 100%; background: #e56b6f; transition: width 0.2s, background 0.3s; border-radius: 8px;">
+            </div>
+          </div>
+          <p id="game-message" style="font-size: 1.2rem; font-weight: bold; color: var(--text-muted);">Tap to smash the
+            anger!</p>
+          <button id="btn-reset-game" class="btn secondary hidden" style="margin-top: 1rem;">Play Again</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="app.js?v=2"></script>
+</body>
+
+</html>
