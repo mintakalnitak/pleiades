@@ -7,9 +7,10 @@
   <title>Pleiades - Menstrual Cycle Tracker</title>
   <meta name="description"
     content="Pleiades is a beautiful, secure, and user-friendly menstrual period tracker. Log dates, symptoms, flow, and get predictions.">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -23,7 +24,7 @@
         <span>Dashboard</span></button>
       <button id="nav-calendar" class="nav-btn" data-label="Calendar"><i class="fa-solid fa-calendar-days"></i>
         <span>Calendar</span></button>
-      <button id="nav-game" class="nav-btn" data-label="Relax"><i class="fa-solid fa-gamepad"></i>
+      <button id="nav-game" class="nav-btn" data-label="Relax"><i class="fa-solid fa-puzzle-piece"></i>
         <span>Relax</span></button>
       <button id="nav-profile" class="nav-btn" data-label="Profile"><i class="fa-solid fa-user"></i>
         <span>Profile</span></button>
@@ -69,62 +70,75 @@
       <div class="dashboard-grid fade-in">
         <!-- Next Period Widget -->
         <div class="card prediction-card">
-          <div class="prediction-circle">
-            <span id="circle-days">--</span>
-            <small>Days</small>
+          <div class="prediction-circle-container">
+            <svg class="progress-ring" width="180" height="180">
+              <circle class="progress-ring__circle-bg" stroke="var(--prediction-circle)" stroke-width="8"
+                fill="transparent" r="80" cx="90" cy="90" />
+              <circle id="progress-bar" class="progress-ring__circle" stroke="var(--accent-color)" stroke-width="8"
+                stroke-linecap="round" fill="transparent" r="80" cx="90" cy="90"
+                style="stroke-dasharray: 502.655; stroke-dashoffset: 502.655;" />
+            </svg>
+            <div class="prediction-circle-text">
+              <span id="circle-days">--</span>
+              <small>Days</small>
+            </div>
           </div>
-          <p id="prediction-date">Next period predicted for: <strong>--</strong></p>
-          <button id="btn-log-today" class="btn secondary"><i class="fa-solid fa-droplet"></i> Log Period Today</button>
+          <p id="prediction-date" style="margin: 1.5rem 0;">Next period predicted for: <strong>--</strong></p>
+          <div style="width: 100%;">
+            <button id="btn-set-period-date" class="btn secondary" style="width: 100%;">
+              <i class="fa-solid fa-calendar-plus"></i> Set Period Date
+            </button>
+            <input type="date" id="date-picker-hidden" style="display: none;">
+          </div>
         </div>
 
-        <!-- Today's Log Widget -->
-        <div class="card log-card">
-          <h3>Log Symptoms for <span id="log-date-display" style="color:var(--accent-color);">Today</span></h3>
-          <form id="log-form" style="margin-top: 1rem;">
-            <input type="hidden" id="log-date-input">
+        <!-- Cycle Phase and Graph Insights -->
+        <div id="cycle-insights-section" class="fade-in" style="margin-top: 2rem;">
+          <div class="card">
+            <div class="insights-header">
+              <h3><i class="fa-solid fa-chart-line"></i> Cycle Analytics</h3>
+              <div id="current-phase-badge" class="phase-badge">Phase: --</div>
+            </div>
 
-            <div class="form-group">
-              <label>Pain / Cramp Level</label>
-              <div class="slider-container">
-                <input type="range" id="log-pain" min="0" max="10" value="0">
-                <div class="slider-labels">
-                  <span>None</span>
-                  <span>Severe</span>
-                </div>
+            <!-- Phase Progress Bar -->
+            <div class="phase-container" style="margin: 1.5rem 0;">
+              <div class="phase-bar">
+                <div id="phase-menstrual" class="phase-segment menstrual" title="Menstruation"></div>
+                <div id="phase-follicular" class="phase-segment follicular" title="Follicular"></div>
+                <div id="phase-ovulation" class="phase-segment ovulation" title="Ovulation"></div>
+                <div id="phase-luteal" class="phase-segment luteal" title="Luteal"></div>
+                <div id="phase-pointer" class="phase-pointer"></div>
+              </div>
+              <div class="phase-labels">
+                <span>Menstruation</span>
+                <span>Follicular</span>
+                <span>Luteal</span>
               </div>
             </div>
 
-            <div class="form-group">
-              <label>Blood Flow</label>
-              <select id="log-flow">
-                <option value="none">None</option>
-                <option value="light">Light</option>
-                <option value="medium">Medium</option>
-                <option value="heavy">Heavy</option>
-                <option value="overflow">Overflow</option>
-              </select>
+            <!-- Chart Area -->
+            <div class="chart-container" style="position: relative; height:250px; width:100%; margin-top: 1rem;">
+              <canvas id="cycleChart"></canvas>
             </div>
 
-            <div class="form-group">
-              <label>Mood</label>
-              <select id="log-mood">
-                <option value="none">Normal</option>
-                <option value="happy">Happy</option>
-                <option value="sensitive">Sensitive</option>
-                <option value="sad">Sad / Tearful</option>
-                <option value="irritable">Irritable / Angry</option>
-                <option value="anxious">Anxious</option>
-              </select>
-            </div>
+            <p id="insight-description"
+              style="font-size: 0.9rem; color: var(--text-muted); margin-top: 1.5rem; text-align: center;">
+              <i class="fa-solid fa-circle-info"></i> Solid lines represent logged data, dashed lines represent
+              predictions.
+            </p>
+          </div>
+        </div>
 
-            <div class="form-group">
-              <label>Nutrient Loss & Health Observations</label>
-              <textarea id="log-notes" rows="3"
-                placeholder="E.g., Took iron supplements, feeling sleepy, headache..."></textarea>
-            </div>
-
-            <button type="submit" class="btn primary">Save Log</button>
-          </form>
+        <!-- Quick Insights Widget -->
+        <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
+          <h3 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fa-solid fa-wand-magic-sparkles"></i>
+            Daily Insight</h3>
+          <p id="insight-text" style="font-size: 1.05rem; line-height: 1.8; color: var(--text-main);">
+            Loading your personalized tip...
+          </p>
+          <button id="btn-next-insight" class="btn secondary" style="margin-top: 1.5rem; align-self: flex-start;">
+            <i class="fa-solid fa-rotate-right"></i> New Tip
+          </button>
         </div>
       </div>
     </section>
@@ -155,45 +169,157 @@
           <div class="legend-item"><span class="dot symptom-dot"></span> Symptoms Logged</div>
         </div>
 
-        <div id="calendar-preview" class="card hidden"
-          style="margin-top: 2rem; border: 2px dashed var(--accent-color); padding: 1.5rem;">
-          <h3 id="preview-date" style="color:var(--accent-color); margin-bottom: 1rem;">Select a date...</h3>
+        <div id="calendar-preview" class="calendar-preview-panel hidden">
+          <h3 id="preview-date" class="preview-title">Select a date...</h3>
           <div id="preview-content" class="hidden">
-            <p style="margin-bottom: 0.5rem;"><strong>Flow:</strong> <span id="preview-flow"></span></p>
-            <p style="margin-bottom: 0.5rem;"><strong>Pain:</strong> <span id="preview-pain"></span>/10</p>
-            <p style="margin-bottom: 0.5rem;"><strong>Mood:</strong> <span id="preview-mood"></span></p>
-            <p style="margin-bottom: 1rem;"><strong>Notes:</strong> <span id="preview-notes"></span></p>
-            <button id="btn-edit-log-preview" class="btn primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Edit
-              Log for this Date</button>
+            <div class="preview-grid">
+              <div class="preview-item"><span class="preview-label">Flow</span><span id="preview-flow"
+                  class="preview-value"></span></div>
+              <div class="preview-item"><span class="preview-label">Pain</span><span id="preview-pain"
+                  class="preview-value"></span><span style="font-size:0.8rem;color:var(--text-muted)">/10</span></div>
+              <div class="preview-item"><span class="preview-label">Mood</span><span id="preview-mood"
+                  class="preview-value"></span></div>
+              <div class="preview-item" style="grid-column: span 2"><span class="preview-label">Notes</span><span
+                  id="preview-notes" class="preview-value"></span></div>
+            </div>
+            <button id="btn-edit-log-preview" class="btn primary" style="margin-top:1rem; width:100%;"><i
+                class="fa-solid fa-pen"></i> Edit Log for this Date</button>
           </div>
-          <p id="preview-empty" class="hidden text-muted">No symptoms logged for this date.</p>
+          <div id="preview-empty" class="hidden preview-empty-state">
+            <i class="fa-solid fa-calendar-xmark" style="font-size:2.5rem; color:var(--accent-color); opacity:0.4;"></i>
+            <p>No log for this date yet.</p>
+            <button id="btn-log-this-date" class="btn primary" style="margin-top:0.5rem; width:100%;"><i
+                class="fa-solid fa-plus"></i> Log for this Date</button>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Game View -->
-    <section id="view-game" class="view hidden">
-      <div class="card fade-in text-center" style="text-align: center;">
-        <h2 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fa-solid fa-face-smile-beam"></i> Mood
-          Booster</h2>
-        <p>Smash the bad vibes to feel better!</p>
-        <div id="game-container" style="margin: 2rem auto;">
-          <div id="game-face" style="font-size: 8rem; cursor: pointer; user-select: none; display: inline-block;">😡
+    <!-- Period Log Modal -->
+    <div id="log-modal-overlay" class="modal-overlay hidden">
+      <div class="modal-card fade-in">
+        <div class="modal-header">
+          <h2><i class="fa-solid fa-droplet"></i> Period Details</h2>
+          <button id="btn-close-modal" class="icon-btn" style="font-size:1.2rem;"><i
+              class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p id="modal-date-label" style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;"></p>
+        <form id="log-form">
+          <input type="hidden" id="log-date-input">
+
+          <div class="form-group">
+            <label>Blood Flow</label>
+            <div class="flow-btn-group">
+              <button type="button" class="flow-btn" data-value="none"><i class="fa-solid fa-ban"></i> None</button>
+              <button type="button" class="flow-btn" data-value="light"><i class="fa-solid fa-droplet"
+                  style="opacity:0.4"></i> Light</button>
+              <button type="button" class="flow-btn" data-value="medium"><i class="fa-solid fa-droplet"
+                  style="opacity:0.7"></i> Medium</button>
+              <button type="button" class="flow-btn" data-value="heavy"><i class="fa-solid fa-droplet"></i>
+                Heavy</button>
+              <button type="button" class="flow-btn" data-value="overflow"><i class="fa-solid fa-droplet-slash"></i>
+                Overflow</button>
+            </div>
+            <input type="hidden" id="log-flow" value="none">
           </div>
-          <div
-            style="width: 100%; max-width: 300px; height: 20px; background: #eee; border-radius: 10px; margin: 2rem auto; overflow: hidden; border: 2px solid var(--border-color);">
-            <div id="game-bar"
-              style="width: 100%; height: 100%; background: #e56b6f; transition: width 0.2s, background 0.3s; border-radius: 8px;">
+
+          <div class="form-group">
+            <label>Pain / Cramp Level: <strong id="pain-label">0</strong></label>
+            <div class="slider-container">
+              <input type="range" id="log-pain" min="0" max="10" value="0">
+              <div class="slider-labels">
+                <span>None</span>
+                <span>Severe</span>
+              </div>
             </div>
           </div>
-          <p id="game-message" style="font-size: 1.2rem; font-weight: bold; color: var(--text-muted);">Tap to smash the
-            anger!</p>
-          <button id="btn-reset-game" class="btn secondary hidden" style="margin-top: 1rem;">Play Again</button>
+
+          <div class="form-group">
+            <label>Mood</label>
+            <div class="mood-btn-group">
+              <button type="button" class="mood-btn" data-value="none">😐 Normal</button>
+              <button type="button" class="mood-btn" data-value="happy">😊 Happy</button>
+              <button type="button" class="mood-btn" data-value="sensitive">🥺 Sensitive</button>
+              <button type="button" class="mood-btn" data-value="sad">😢 Sad</button>
+              <button type="button" class="mood-btn" data-value="irritable">😠 Irritable</button>
+              <button type="button" class="mood-btn" data-value="anxious">😰 Anxious</button>
+            </div>
+            <input type="hidden" id="log-mood" value="none">
+          </div>
+
+          <div class="form-group">
+            <label>Nutrient Loss & Health Observations</label>
+            <textarea id="log-notes" rows="3"
+              placeholder="E.g., Took iron supplements, feeling sleepy, headache..."></textarea>
+          </div>
+
+          <button type="submit" class="btn primary" style="width: 100%; font-size:1.1rem; padding: 1rem;">
+            <i class="fa-solid fa-floppy-disk"></i> Save Period Log
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Relax / Puzzle View -->
+    <section id="view-game" class="view hidden">
+      <div class="relax-header fade-in">
+        <h2><i class="fa-solid fa-brain"></i> Mind & Mood Games</h2>
+        <p>Distract yourself and lift your spirits with a quick puzzle!</p>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="game-tabs fade-in">
+        <button class="game-tab active" data-tab="smash">😡 Mood Smasher</button>
+        <button class="game-tab" data-tab="memory">🧠 Memory Match</button>
+        <button class="game-tab" data-tab="trivia">❓ Period Trivia</button>
+      </div>
+
+      <!-- Smash Game -->
+      <div id="tab-smash" class="game-panel card fade-in" style="text-align:center;">
+        <h3 style="color: var(--accent-color); margin-bottom:0.5rem;">Smash the Bad Vibes!</h3>
+        <p style="color:var(--text-muted); margin-bottom:1.5rem;">Tap the emoji to release tension.</p>
+        <div id="game-face"
+          style="font-size: 8rem; cursor: pointer; user-select: none; display: inline-block; transition: transform 0.1s;">
+          😡</div>
+        <div
+          style="width: 100%; max-width: 320px; height: 18px; background: #f0e0e8; border-radius: 10px; margin: 2rem auto; overflow: hidden;">
+          <div id="game-bar"
+            style="width: 100%; height: 100%; background: linear-gradient(90deg,#ff758c,#ff4d6d); transition: width 0.2s; border-radius: 8px;">
+          </div>
         </div>
+        <p id="game-message" style="font-size: 1.1rem; font-weight: 600; color: var(--text-muted);">Tap to smash the
+          anger!</p>
+        <button id="btn-reset-game" class="btn secondary hidden" style="margin-top: 1rem;">Play Again</button>
+      </div>
+
+      <!-- Memory Match Game -->
+      <div id="tab-memory" class="game-panel card fade-in hidden" style="text-align:center;">
+        <h3 style="color: var(--accent-color); margin-bottom:0.5rem;">Emoji Memory Match</h3>
+        <p style="color:var(--text-muted); margin-bottom:1rem;">Match all pairs to win! Moves: <strong
+            id="memory-moves">0</strong></p>
+        <div id="memory-board" class="memory-board"></div>
+        <button id="btn-reset-memory" class="btn secondary" style="margin-top: 1.5rem;"><i
+            class="fa-solid fa-rotate-right"></i> New Game</button>
+      </div>
+
+      <!-- Trivia Game -->
+      <div id="tab-trivia" class="game-panel card fade-in hidden" style="text-align:center;">
+        <h3 style="color: var(--accent-color); margin-bottom:0.5rem;">Period & Health Trivia</h3>
+        <p id="trivia-score-display" style="color:var(--text-muted); margin-bottom:1rem;">Score: <strong
+            id="trivia-score">0</strong> / <strong id="trivia-total">0</strong></p>
+        <div id="trivia-question-box" class="trivia-question-box">
+          <p id="trivia-question" style="font-size:1.15rem; font-weight:600; line-height:1.6;"></p>
+        </div>
+        <div id="trivia-options" class="trivia-options"></div>
+        <p id="trivia-feedback" style="margin-top:1rem; font-weight:700; min-height:1.5rem;"></p>
+        <button id="btn-next-trivia" class="btn primary hidden" style="margin-top:0.5rem;"><i
+            class="fa-solid fa-arrow-right"></i> Next Question</button>
+        <button id="btn-reset-trivia" class="btn secondary hidden" style="margin-top:0.5rem;"><i
+            class="fa-solid fa-rotate-right"></i> Play Again</button>
       </div>
     </section>
   </main>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=4"></script>
 </body>
 
 </html>
