@@ -7,7 +7,7 @@
   <title>Pleiades - Menstrual Cycle Tracker</title>
   <meta name="description"
     content="Pleiades is a beautiful, secure, and user-friendly menstrual period tracker. Log dates, symptoms, flow, and get predictions.">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=6">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,11 +19,21 @@
     <div class="logo">
       <i class="fa-solid fa-moon"></i> Pleiades
     </div>
+    <div class="header-actions">
+      <button id="btn-dark-mode" class="icon-btn" title="Toggle Dark Mode">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      <button id="btn-notifications" class="icon-btn" title="Enable Notifications">
+        <i class="fa-solid fa-bell"></i>
+      </button>
+    </div>
     <nav>
       <button id="nav-dashboard" class="nav-btn active" data-label="Dashboard"><i class="fa-solid fa-home"></i>
         <span>Dashboard</span></button>
       <button id="nav-calendar" class="nav-btn" data-label="Calendar"><i class="fa-solid fa-calendar-days"></i>
         <span>Calendar</span></button>
+      <button id="nav-history" class="nav-btn" data-label="History"><i class="fa-solid fa-clock-rotate-left"></i>
+        <span>History</span></button>
       <button id="nav-game" class="nav-btn" data-label="Relax"><i class="fa-solid fa-puzzle-piece"></i>
         <span>Relax</span></button>
       <button id="nav-profile" class="nav-btn" data-label="Profile"><i class="fa-solid fa-user"></i>
@@ -65,6 +75,14 @@
       <header class="dashboard-header fade-in">
         <h1 id="greeting-title">Hello!</h1>
         <p>Your period is expected in <strong id="countdown-days">--</strong> days.</p>
+        <!-- Streak Badge -->
+        <div id="streak-badge" class="streak-badge hidden">
+          <i class="fa-solid fa-fire"></i> <span id="streak-count">0</span>-day logging streak!
+        </div>
+        <!-- Cycle Irregularity Warning -->
+        <div id="irregularity-warning" class="irregularity-warning hidden">
+          <i class="fa-solid fa-triangle-exclamation"></i> <span id="irregularity-text"></span>
+        </div>
       </header>
 
       <div class="dashboard-grid fade-in">
@@ -92,43 +110,6 @@
           </div>
         </div>
 
-        <!-- Cycle Phase and Graph Insights -->
-        <div id="cycle-insights-section" class="fade-in" style="margin-top: 2rem;">
-          <div class="card">
-            <div class="insights-header">
-              <h3><i class="fa-solid fa-chart-line"></i> Cycle Analytics</h3>
-              <div id="current-phase-badge" class="phase-badge">Phase: --</div>
-            </div>
-
-            <!-- Phase Progress Bar -->
-            <div class="phase-container" style="margin: 1.5rem 0;">
-              <div class="phase-bar">
-                <div id="phase-menstrual" class="phase-segment menstrual" title="Menstruation"></div>
-                <div id="phase-follicular" class="phase-segment follicular" title="Follicular"></div>
-                <div id="phase-ovulation" class="phase-segment ovulation" title="Ovulation"></div>
-                <div id="phase-luteal" class="phase-segment luteal" title="Luteal"></div>
-                <div id="phase-pointer" class="phase-pointer"></div>
-              </div>
-              <div class="phase-labels">
-                <span>Menstruation</span>
-                <span>Follicular</span>
-                <span>Luteal</span>
-              </div>
-            </div>
-
-            <!-- Chart Area -->
-            <div class="chart-container" style="position: relative; height:250px; width:100%; margin-top: 1rem;">
-              <canvas id="cycleChart"></canvas>
-            </div>
-
-            <p id="insight-description"
-              style="font-size: 0.9rem; color: var(--text-muted); margin-top: 1.5rem; text-align: center;">
-              <i class="fa-solid fa-circle-info"></i> Solid lines represent logged data, dashed lines represent
-              predictions.
-            </p>
-          </div>
-        </div>
-
         <!-- Quick Insights Widget -->
         <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
           <h3 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -140,6 +121,76 @@
             <i class="fa-solid fa-rotate-right"></i> New Tip
           </button>
         </div>
+      </div>
+
+      <!-- Hydration Tracker -->
+      <div id="hydration-section" class="card fade-in" style="margin-top: 2rem;">
+        <div class="hydration-header">
+          <h3><i class="fa-solid fa-droplet" style="color: #4fc3f7;"></i> Hydration Tracker</h3>
+          <span id="hydration-count" class="hydration-count">0 / 8 glasses</span>
+        </div>
+        <div class="hydration-glasses" id="hydration-glasses">
+          <!-- 8 glasses rendered by JS -->
+        </div>
+        <div class="hydration-bar-container">
+          <div id="hydration-bar" class="hydration-bar" style="width: 0%;"></div>
+        </div>
+        <p id="hydration-message" class="hydration-message">Tap the glasses to track your water intake today 💧</p>
+      </div>
+
+      <!-- Cycle Phase and Graph Insights -->
+      <div id="cycle-insights-section" class="fade-in" style="margin-top: 2rem;">
+        <div class="card">
+          <div class="insights-header">
+            <h3><i class="fa-solid fa-chart-line"></i> Cycle Analytics</h3>
+            <div id="current-phase-badge" class="phase-badge">Phase: --</div>
+          </div>
+
+          <!-- Phase Progress Bar -->
+          <div class="phase-container" style="margin: 1.5rem 0;">
+            <div class="phase-bar">
+              <div id="phase-menstrual" class="phase-segment menstrual" title="Menstruation"></div>
+              <div id="phase-follicular" class="phase-segment follicular" title="Follicular"></div>
+              <div id="phase-ovulation" class="phase-segment ovulation" title="Ovulation"></div>
+              <div id="phase-luteal" class="phase-segment luteal" title="Luteal"></div>
+              <div id="phase-pointer" class="phase-pointer"></div>
+            </div>
+            <div class="phase-labels">
+              <span>Menstruation</span>
+              <span>Follicular</span>
+              <span>Luteal</span>
+            </div>
+          </div>
+
+          <!-- Ovulation Window Badge -->
+          <div id="ovulation-window" class="ovulation-window hidden">
+            <i class="fa-solid fa-egg"></i>
+            <span id="ovulation-text">Fertile window: --</span>
+          </div>
+
+          <!-- Chart Area -->
+          <div class="chart-container" style="position: relative; height:250px; width:100%; margin-top: 1rem;">
+            <canvas id="cycleChart"></canvas>
+          </div>
+
+          <p id="insight-description"
+            style="font-size: 0.9rem; color: var(--text-muted); margin-top: 1.5rem; text-align: center;">
+            <i class="fa-solid fa-circle-info"></i> Solid lines represent logged data, dashed lines represent
+            predictions.
+          </p>
+        </div>
+      </div>
+
+      <!-- Mood Trends Chart -->
+      <div class="card fade-in" style="margin-top: 2rem;">
+        <h3 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fa-solid fa-face-smile-beam"></i> Mood
+          Trends</h3>
+        <div class="chart-container" style="position: relative; height:220px; width:100%;">
+          <canvas id="moodChart"></canvas>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.8rem; text-align: center;">
+          <i class="fa-solid fa-circle-info"></i> Track your moods over time to spot patterns in your cycle.
+        </p>
       </div>
     </section>
 
@@ -166,6 +217,7 @@
         <div class="calendar-legend">
           <div class="legend-item"><span class="dot period-dot"></span> Logged Period</div>
           <div class="legend-item"><span class="dot predicted-dot"></span> Predicted</div>
+          <div class="legend-item"><span class="dot ovulation-dot"></span> Fertile Window</div>
           <div class="legend-item"><span class="dot symptom-dot"></span> Symptoms Logged</div>
         </div>
 
@@ -179,6 +231,8 @@
                   class="preview-value"></span><span style="font-size:0.8rem;color:var(--text-muted)">/10</span></div>
               <div class="preview-item"><span class="preview-label">Mood</span><span id="preview-mood"
                   class="preview-value"></span></div>
+              <div class="preview-item"><span class="preview-label">Energy</span><span id="preview-energy"
+                  class="preview-value"></span></div>
               <div class="preview-item" style="grid-column: span 2"><span class="preview-label">Notes</span><span
                   id="preview-notes" class="preview-value"></span></div>
             </div>
@@ -190,6 +244,60 @@
             <p>No log for this date yet.</p>
             <button id="btn-log-this-date" class="btn primary" style="margin-top:0.5rem; width:100%;"><i
                 class="fa-solid fa-plus"></i> Log for this Date</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- History View -->
+    <section id="view-history" class="view hidden">
+      <div class="card fade-in">
+        <div class="history-header">
+          <h2><i class="fa-solid fa-clock-rotate-left"></i> Period History & Report</h2>
+          <button id="btn-export-data" class="btn secondary">
+            <i class="fa-solid fa-file-export"></i> Export Data
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="history-stats-grid" style="margin-top: 1.5rem;">
+          <div class="history-stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
+            <div class="stat-value" id="stat-avg-cycle">--</div>
+            <div class="stat-label">Avg Cycle Length</div>
+          </div>
+          <div class="history-stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-droplet"></i></div>
+            <div class="stat-value" id="stat-avg-period">--</div>
+            <div class="stat-label">Avg Period Length</div>
+          </div>
+          <div class="history-stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="stat-value" id="stat-total-logs">--</div>
+            <div class="stat-label">Total Logs</div>
+          </div>
+          <div class="history-stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-chart-simple"></i></div>
+            <div class="stat-value" id="stat-avg-flow">--</div>
+            <div class="stat-label">Most Common Flow</div>
+          </div>
+        </div>
+
+        <!-- Cycle Length Trend Chart -->
+        <div style="margin-top: 2rem;">
+          <h3 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fa-solid fa-chart-bar"></i> Cycle
+            Length Trend</h3>
+          <div class="chart-container" style="position: relative; height:220px; width:100%;">
+            <canvas id="historyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Past Period List -->
+        <div style="margin-top: 2rem;">
+          <h3 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fa-solid fa-list"></i> Past Periods
+          </h3>
+          <div id="history-list" class="history-list">
+            <p style="color: var(--text-muted); text-align: center;">No period history recorded yet.</p>
           </div>
         </div>
       </div>
@@ -247,6 +355,59 @@
             <input type="hidden" id="log-mood" value="none">
           </div>
 
+          <!-- Symptom Tracker -->
+          <div class="form-group">
+            <label><i class="fa-solid fa-stethoscope"></i> Symptoms</label>
+            <div class="symptom-btn-group" id="symptom-group">
+              <button type="button" class="symptom-btn" data-value="headache">🤕 Headache</button>
+              <button type="button" class="symptom-btn" data-value="bloating">🫃 Bloating</button>
+              <button type="button" class="symptom-btn" data-value="backache">🔙 Backache</button>
+              <button type="button" class="symptom-btn" data-value="nausea">🤢 Nausea</button>
+              <button type="button" class="symptom-btn" data-value="fatigue">😴 Fatigue</button>
+              <button type="button" class="symptom-btn" data-value="acne">😖 Acne</button>
+              <button type="button" class="symptom-btn" data-value="craving">🍫 Cravings</button>
+              <button type="button" class="symptom-btn" data-value="insomnia">🌙 Insomnia</button>
+            </div>
+          </div>
+
+          <!-- Sleep & Energy -->
+          <div class="form-group">
+            <label><i class="fa-solid fa-bed"></i> Sleep Quality: <strong id="sleep-label">5</strong>/10</label>
+            <div class="slider-container">
+              <input type="range" id="log-sleep" min="0" max="10" value="5">
+              <div class="slider-labels">
+                <span>Poor</span>
+                <span>Excellent</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-bolt"></i> Energy Level: <strong id="energy-label">5</strong>/10</label>
+            <div class="slider-container">
+              <input type="range" id="log-energy" min="0" max="10" value="5">
+              <div class="slider-labels">
+                <span>Exhausted</span>
+                <span>Energized</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medication / Supplement Tracker -->
+          <div class="form-group">
+            <label><i class="fa-solid fa-pills"></i> Medications / Supplements</label>
+            <div class="med-btn-group" id="med-group">
+              <button type="button" class="med-btn" data-value="iron">🩸 Iron</button>
+              <button type="button" class="med-btn" data-value="painkiller">💊 Painkiller</button>
+              <button type="button" class="med-btn" data-value="vitamin-d">☀️ Vitamin D</button>
+              <button type="button" class="med-btn" data-value="vitamin-c">🍋 Vitamin C</button>
+              <button type="button" class="med-btn" data-value="magnesium">✨ Magnesium</button>
+              <button type="button" class="med-btn" data-value="calcium">🦴 Calcium</button>
+              <button type="button" class="med-btn" data-value="omega3">🐟 Omega-3</button>
+              <button type="button" class="med-btn" data-value="other">📦 Other</button>
+            </div>
+          </div>
+
           <div class="form-group">
             <label>Nutrient Loss & Health Observations</label>
             <textarea id="log-notes" rows="3"
@@ -282,7 +443,7 @@
           style="font-size: 8rem; cursor: pointer; user-select: none; display: inline-block; transition: transform 0.1s;">
           😡</div>
         <div
-          style="width: 100%; max-width: 320px; height: 18px; background: #f0e0e8; border-radius: 10px; margin: 2rem auto; overflow: hidden;">
+          style="width: 100%; max-width: 320px; height: 18px; background: var(--game-bar-bg, #f0e0e8); border-radius: 10px; margin: 2rem auto; overflow: hidden;">
           <div id="game-bar"
             style="width: 100%; height: 100%; background: linear-gradient(90deg,#ff758c,#ff4d6d); transition: width 0.2s; border-radius: 8px;">
           </div>
@@ -314,12 +475,19 @@
         <p id="trivia-feedback" style="margin-top:1rem; font-weight:700; min-height:1.5rem;"></p>
         <button id="btn-next-trivia" class="btn primary hidden" style="margin-top:0.5rem;"><i
             class="fa-solid fa-arrow-right"></i> Next Question</button>
-        <button id="btn-reset-trivia" class="btn secondary hidden" style="margin-top:0.5rem;"><i
-            class="fa-solid fa-rotate-right"></i> Play Again</button>
+        <!-- Trivia Completion Card -->
+        <div id="trivia-completion" class="trivia-completion hidden">
+          <div class="trivia-completion-icon">🎉</div>
+          <h3 id="trivia-completion-title">Quiz Complete!</h3>
+          <p id="trivia-completion-text"></p>
+          <div id="trivia-completion-stars" class="trivia-stars"></div>
+          <button id="btn-reset-trivia" class="btn primary" style="margin-top:1rem;"><i
+              class="fa-solid fa-rotate-right"></i> Play Again</button>
+        </div>
       </div>
     </section>
   </main>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=6"></script>
 </body>
 
 </html>
